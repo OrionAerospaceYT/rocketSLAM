@@ -7,6 +7,7 @@ from features import Features
 left = cv.VideoCapture('./Data/left.mp4')
 right = cv.VideoCapture('./Data/right.mp4')
 stereo_video = cv.VideoCapture('./Data/dual_camera_compressed.mp4')
+match_thresh = 40
 '''
 try adding a check for fiducials, if fioducials just track those and use this to calibrate
 if not fiducials run SLAM stuff 
@@ -19,8 +20,16 @@ TO DO:
     -- look into filtering -- Essential Matrix and other Camera calibration 
 '''
 
+
+def distanceCheck(v,matches,threshold):
+    if (((v[1][0] -v[0][0])**2)+((v[1][1]-v[0][1])**2)) < threshold*threshold: #for speed can change the thresh^2 to be computed once and then passed
+        matches.append(v)
+    return matches
+
 def main():
     extractor = Features()
+    ret_vecs_r = []
+    ret_vecs_l = []
     while(stereo_video.isOpened()):
         ret,frame = stereo_video.read()
         frames_left,frames_right = extractor.processFrame(frame)
@@ -36,7 +45,9 @@ def main():
                 l1 = int(l1[0]),int(l1[1])
                 l2 = left_feat[1]["kp"][p1].pt
                 l2 = int(l2[0]),int(l2[1])
-                fl = cv.line(frames_left[0],l1,l2,(0,0,0),6)
+                ret_vecs_l = distanceCheck((l1,l2),ret_vecs_l,match_thresh)
+            for v in ret_vecs_l:    
+                fl = cv.line(frames_left[0],v[0],v[1],(0,0,0),6)
             for m in right_m[:20]:
                 p1 = m.trainIdx
                 p2 = m.queryIdx
@@ -44,7 +55,9 @@ def main():
                 l1 = int(l1[0]),int(l1[1])
                 l2 = right_feat[1]["kp"][p1].pt
                 l2 = int(l2[0]),int(l2[1])
-                fr = cv.line(fr,l1,l2,(0,0,0),6)
+                ret_vecs_r = distanceCheck((l1,l2),ret_vecs_r,match_thresh)
+            for v in ret_vecs_r:
+                fr = cv.line(fr,v[0],v[1],(0,0,0),6)
             output = cv.vconcat([fl,cv.flip(fr,-1)])
             output = cv.resize(output,(1280//2,1440//2))
             cv.imshow('out', output)
