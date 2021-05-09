@@ -19,6 +19,9 @@ TO DO:
     -- look into VO and extracting data
     -- look into filtering -- Essential Matrix and other Camera calibration 
 '''
+#create log file for camera data 
+log = open("cam_log.txt","w+")
+log.write("Log file Opened")
 
 
 def distanceCheck(v,matches,threshold):
