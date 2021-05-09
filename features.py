@@ -14,8 +14,9 @@ class Features:
         self.last_framer = 0
         self.first_frame = True
     def processFrame(self,stereo_frame):
-        self.frame_left = stereo_frame[0:1080,0:1920//2]
-        self.frame_right = stereo_frame[0:1080,1920//2:1920]
+        #trimmed the frame towards the middle a little to save processing
+        self.frame_left = stereo_frame[0:1080-200,0:1920//2]
+        self.frame_right = stereo_frame[0:1080-200,1920//2:1920]
         #split the frame and convert to one channel
         self.gray_left = cv.cvtColor(self.frame_left,cv.COLOR_BGR2GRAY)
         self.gray_right = cv.cvtColor(self.frame_right,cv.COLOR_BGR2GRAY)
