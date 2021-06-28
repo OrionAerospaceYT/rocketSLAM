@@ -1,0 +1,7 @@
+notes:
+
+"forward" -> in1 low, in2 speed
+"backward" -> in1 speed, in2 low
+
+
+positive drive correspongs with negative erro 

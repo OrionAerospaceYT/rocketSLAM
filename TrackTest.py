@@ -4,6 +4,7 @@ import numpy as np
 import picamera
 import os
 from datetime import datetime
+from features import Features
 
 #Eventually lets move log stuff to its own wrapper
 log = open("cam_log.txt","w+")
@@ -24,11 +25,14 @@ parameters = cv.aruco.DetectorParameters_create()
 MARKER_IDS = [1,2,3,4] #aruco markers from https://chev.me/arucogen/
 MARKER_SIZE = 10 #cm
 font = cv2.FONT_HERSHEY_SIMPLEX
-
+extractor = Features()
 
 for frame in camera.capture_continuous(capture, format="bgra", use_video_port=True, resize=(img_width,img_height)):
-    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    corners,ids,rejects = aruco.detectMarkers(frame,dictionary,parameters=parameters,cameraMatrix=cam_mat,distCoeff=dist_mat)
+    frames_l,frames_r = extractor.processFrame(frame)
+    frame_l = frames_l[0]
+    frame_r = frames_r[0]
+    corners_l,ids_l,rejects = aruco.detectMarkers(frame_l,dictionary,parameters=parameters,cameraMatrix=cam_mat_l,distCoeff=dist_mat_l)
+    corners_r,ids_r,rejects = aruco.detectMarkers(frame_r,dictionary,parameters=parameters,cameraMatrix=cam_mat_r,distCoeff=dist_mat_r)
     if np.all(ids != None):
         rvec, tvec ,_ = aruco.estimatePoseSingleMarkers(corners, 0.05, mtx, dist)
         for i in range(0, ids.size):
